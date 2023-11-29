@@ -11,7 +11,7 @@ cfg_if! {
 
         #[get("/style.css")]
         async fn css() -> impl Responder {
-            actix_files::NamedFile::open_async("./style/tailwind.css").await
+            actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
         }
 
         #[actix_web::main]
