@@ -4,8 +4,8 @@ use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "hydrate")] {
         use wasm_bindgen::prelude::wasm_bindgen;
-        use crate::app::*;
-        use leptos::*;
+        use crate::app::App;
+        use leptos::{view, logging};
 
         #[wasm_bindgen]
         pub fn hydrate() {

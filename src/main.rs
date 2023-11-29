@@ -4,9 +4,9 @@ use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "ssr")] {
         use actix_files::Files;
-        use actix_web::*;
-        use leptos::*;
-        use crate::app::*;
+        use actix_web::{ App, HttpServer, Responder, middleware, get};
+        use leptos::{get_configuration, view};
+        use crate::app::App;
         use leptos_actix::{generate_route_list, LeptosRoutes};
 
         #[get("/style.css")]
