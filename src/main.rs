@@ -1,46 +1,41 @@
 mod app;
-use cfg_if::cfg_if;
 
-cfg_if! {
-    if #[cfg(feature = "ssr")] {
-        use actix_files::Files;
-        use actix_web::{ App, HttpServer, Responder, middleware, get};
-        use leptos::{get_configuration, view};
-        use crate::app::App;
-        use leptos_actix::{generate_route_list, LeptosRoutes};
+use crate::app::App;
+use std::net::TcpListener;
 
-        #[get("/style.css")]
-        async fn css() -> impl Responder {
-            actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
-        }
+use sqlx::postgres::PgPoolOptions;
+use when3meet::configuration;
+use when3meet::startup::run;
+use when3meet::telemetry::{get_subscriber, init_subscriber};
 
-        #[actix_web::main]
-        async fn main() -> std::io::Result<()> {
+use actix_files::Files;
+use actix_web::{get, middleware, App, HttpServer, Responder};
+use leptos::{get_configuration, view};
+use leptos_actix::{generate_route_list, LeptosRoutes};
 
-            // Setting this to None means we'll be using cargo-leptos and its env vars.
-            let conf = get_configuration(None).await.unwrap();
+#[get("/style.css")]
+async fn css() -> impl Responder {
+    actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
+}
 
-            let addr = conf.leptos_options.site_addr;
+#[tokio::main]
+async fn main() -> std::io::Result<()> {
+    let subscriber = get_subscriber("when3meet".into(), "info".into(), std::io::stdout);
+    init_subscriber(subscriber);
 
-            // Generate the list of routes in your Leptos App
-            let routes = generate_route_list(|| view! { <App/> });
+    let configuration = configuration::get_configuration().expect("Failed to read configuration.");
+    let connection_pool = PgPoolOptions::new()
+        .acquire_timeout(std::time::Duration::from_secs(2))
+        .connect_with(configuration.database.with_db())
+        .await
+        .expect("Failed to connect to Postgres.");
 
-            HttpServer::new(move || {
-                let leptos_options = &conf.leptos_options;
-                let site_root = &leptos_options.site_root;
-                let routes = &routes;
-                App::new()
-                    .service(css)
-                    .leptos_routes(leptos_options.to_owned(), routes.to_owned(), || view! { <App/> })
-                    .service(Files::new("/", site_root))
-                    .wrap(middleware::Compress::default())
-            })
-            .bind(&addr)?
-            .run()
-            .await
-        }
-    }
-    else {
-        pub fn main() {}
-    }
+    sqlx::migrate!().run(&db_pool).await?;
+
+    let address = format!(
+        "{}:{}",
+        configuration.application.host, configuration.application.port
+    );
+    let listener = TcpListener::bind(address)?;
+    run(listener, connection_pool)?.await?
 }
