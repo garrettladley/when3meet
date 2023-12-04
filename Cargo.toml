@@ -6,70 +6,46 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
+actix-files = { version = "0.6.2", optional = true }
+actix-web = { version = "4.2.1", optional = true, features = ["macros"] }
+anyhow = "1.0.68"
+broadcaster = "1.0.0"
+console_log = "1.0.0"
+console_error_panic_hook = "0.1.7"
+serde = { version = "1.0.152", features = ["derive"] }
+futures = "0.3.25"
+cfg-if = "1.0.0"
 leptos = { version = "0.5.4" }
 leptos_actix = { version = "0.5.4", optional = true }
 leptos_meta = { version = "0.5.4" }
 leptos_router = { version = "0.5.4" }
-gloo-net = { version = "0.4", features = ["http"] }
-log = "0.4"
-tracing = "0.1.40"
-actix-web = { version = "4.4", features = ["macros"] }
-serde = "1.0.115"
-config = { version = "0.13", default-features = false, features = ["yaml"] }
-sqlx = { version = "0.7.1", default-features = false, features = [
-  "runtime-tokio-rustls",
-  "macros",
-  "postgres",
-  "uuid",
-  "chrono",
-  "migrate",
-] }
-uuid = { version = "1", features = ["v4"] }
-chrono = { version = "0.4.22", default-features = false, features = ["clock"] }
-tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
-tracing-bunyan-formatter = "0.3.1"
-tracing-log = "0.2.0"
-serde-aux = "4"
-unicode-segmentation = "1.7.1"
-tracing-actix-web = "0.7"
-secrecy = { version = "0.8", features = ["serde"] }
-thiserror = "1.0.32"
-wasm-bindgen = { version = "0.2", optional = true }
-console_log = { version = "1", optional = true }
-console_error_panic_hook = { version = "0.1", optional = true }
-actix-files = { version = "0.6" }
-futures = { version = "0.3" }
-simple_logger = { version = "4.0" }
+log = "0.4.17"
+simple_logger = "4.0.0"
+gloo = { git = "https://github.com/rustwasm/gloo" }
+sqlx = { version = "0.6.2", features = [
+	"runtime-tokio-rustls",
+	"sqlite",
+], optional = true }
+wasm-bindgen = "0.2"
+tokio = { version = "1", features = ["rt", "time"], optional = true }
 
 [features]
-hydrate = [
-  "leptos/hydrate",
-  "leptos_meta/hydrate",
-  "leptos_router/hydrate",
-  "dep:wasm-bindgen",
-  "dep:console_log",
-  "dep:console_error_panic_hook",
+hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+ssr = [
+	"dep:actix-files",
+	"dep:actix-web",
+	"dep:sqlx",
+	"leptos/ssr",
+	"leptos_actix",
+	"leptos_meta/ssr",
+	"leptos_router/ssr",
+	"dep:tokio",
 ]
 
 [package.metadata.cargo-all-features]
-denylist = [
-  "actix-files",
-  "actix-web",
-  "console_error_panic_hook",
-  "console_log",
-  "futures",
-  "leptos_actix",
-  "simple_logger",
-  "wasm-bindgen",
-]
-
-[profile.release]
-codegen-units = 1
-lto = true
-opt-level = 'z'
+denylist = ["actix-files", "actix-web", "leptos_actix", "sqlx"]
+skip_feature_sets = [["csr", "ssr"], ["csr", "hydrate"], ["ssr", "hydrate"]]
 
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name   
@@ -79,11 +55,13 @@ site-root = "target/site"
 # The site-root relative folder where all compiled output (JS, WASM and CSS) is written
 # Defaults to pkg	
 site-pkg-dir = "pkg"
-# The tailwind input file.
-#
-# Optional, Activates the tailwind build
+# [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
 tailwind-input-file = "style/tailwind.css"
+style-input-file = "style/tailwind.css"
+# [Optional] Files in the asset-dir will be copied to the site-root directory
 assets-dir = "public"
+# The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.
+site-addr = "127.0.0.1:3000"
 # The port to use for automatic reload monitoring
 reload-port = 3001
 #  The browserlist query used for optimizing the CSS.
@@ -95,7 +73,7 @@ env = "DEV"
 # The features to use when compiling the bin target
 #
 # Optional. Can be over-ridden with the command line parameter --bin-features
-bin-features = ["hydrate"]
+bin-features = ["ssr"]
 
 # If the --no-default-features flag should be used when compiling the bin target
 #

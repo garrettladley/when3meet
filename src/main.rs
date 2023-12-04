@@ -1,41 +1,47 @@
-mod app;
+use cfg_if::cfg_if;
+mod todo;
 
-use crate::app::App;
-use std::net::TcpListener;
+cfg_if! {
+    if #[cfg(feature = "ssr")] {
+        use actix_files::{Files};
+        use actix_web::*;
+        use crate::todo::*;
+        use leptos::*;
+        use leptos_actix::{generate_route_list, LeptosRoutes};
 
-use sqlx::postgres::PgPoolOptions;
-use when3meet::configuration;
-use when3meet::startup::run;
-use when3meet::telemetry::{get_subscriber, init_subscriber};
+        #[get("/style.css")]
+        async fn css() -> impl Responder {
+            actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
+        }
 
-use actix_files::Files;
-use actix_web::{get, middleware, App, HttpServer, Responder};
-use leptos::{get_configuration, view};
-use leptos_actix::{generate_route_list, LeptosRoutes};
+        #[actix_web::main]
+        async fn main() -> std::io::Result<()> {
+            db().await.expect("couldn't connect to DB");
 
-#[get("/style.css")]
-async fn css() -> impl Responder {
-    actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
-}
+            let conf = get_configuration(None).await.unwrap();
 
-#[tokio::main]
-async fn main() -> std::io::Result<()> {
-    let subscriber = get_subscriber("when3meet".into(), "info".into(), std::io::stdout);
-    init_subscriber(subscriber);
+            let addr = conf.leptos_options.site_addr;
 
-    let configuration = configuration::get_configuration().expect("Failed to read configuration.");
-    let connection_pool = PgPoolOptions::new()
-        .acquire_timeout(std::time::Duration::from_secs(2))
-        .connect_with(configuration.database.with_db())
-        .await
-        .expect("Failed to connect to Postgres.");
+            let routes = generate_route_list(TodoApp);
 
-    sqlx::migrate!().run(&db_pool).await?;
+            HttpServer::new(move || {
+                let leptos_options = &conf.leptos_options;
+                let site_root = &leptos_options.site_root;
+                let routes = &routes;
 
-    let address = format!(
-        "{}:{}",
-        configuration.application.host, configuration.application.port
-    );
-    let listener = TcpListener::bind(address)?;
-    run(listener, connection_pool)?.await?
+                App::new()
+                    .service(css)
+                    .route("/api/{tail:.*}", leptos_actix::handle_server_fns())
+                    .leptos_routes(leptos_options.to_owned(), routes.to_owned(), TodoApp)
+                    .service(Files::new("/", site_root))
+                    .wrap(middleware::Compress::default())
+            })
+            .bind(addr)?
+            .run()
+            .await
+        }
+    } else {
+        fn main() {
+        }
+    }
 }

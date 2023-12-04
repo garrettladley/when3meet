@@ -1,17 +1,17 @@
-mod app;
+use cfg_if::cfg_if;
+pub mod todo;
 
-use crate::app::App;
-use leptos::{logging, view};
-use wasm_bindgen::prelude::wasm_bindgen;
+cfg_if! {
+    if #[cfg(feature = "hydrate")] {
+        use wasm_bindgen::prelude::wasm_bindgen;
+        use crate::todo::*;
 
-#[wasm_bindgen]
-pub fn hydrate() {
-    _ = console_log::init_with_level(log::Level::Debug);
-    console_error_panic_hook::set_once();
+        #[wasm_bindgen]
+        pub fn hydrate() {
+            console_error_panic_hook::set_once();
+            _ = console_log::init_with_level(log::Level::Debug);
 
-    logging::log!("hydrate mode - hydrating");
-
-    leptos::mount_to_body(|| {
-        view! { <App/> }
-    });
+            leptos::mount_to_body(TodoApp);
+        }
+    }
 }
