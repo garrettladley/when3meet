@@ -1,7 +1,7 @@
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct SafeString(String);
+pub struct SafeString(pub String);
 
 impl SafeString {
     pub fn parse(s: String) -> Result<SafeString, String> {

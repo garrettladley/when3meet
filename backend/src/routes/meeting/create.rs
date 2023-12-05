@@ -86,10 +86,10 @@ pub async fn insert_applicant(
     insert_meeting.name.as_ref(), 
     insert_meeting.start,
     insert_meeting.end,
-    insert_meeting.no_earlier_than.hour as i16,
-    insert_meeting.no_earlier_than.minute as i16,
-    insert_meeting.no_later_than.hour as i16,
-    insert_meeting.no_later_than.minute as i16)
+    insert_meeting.no_earlier_than.hr as i8,
+    insert_meeting.no_earlier_than.min as i8,
+    insert_meeting.no_later_than.hr as i8,
+    insert_meeting.no_later_than.min as i8)
         .execute(pool)
         .await?;
 
