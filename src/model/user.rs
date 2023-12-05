@@ -1,7 +1,8 @@
 use crate::model::{SafeString, Slot};
 
+#[derive(serde::Serialize, serde::Deserialize)]
 pub struct User {
-    id: i64,
-    name: SafeString,
-    slots: Vec<Slot>,
+    pub id: i64,
+    pub name: SafeString,
+    pub slots: Vec<Slot>,
 }

@@ -39,7 +39,10 @@ secrecy = { version = "0.8", features = ["serde"] }
 config = { version = "0.13", default-features = false, features = ["yaml"] }
 tracing = "0.1.40"
 unicode-segmentation = "1.7.1"
-chrono = { version = "0.4.22", default-features = false, features = ["clock"] }
+chrono = { version = "0.4.22", default-features = false, features = [
+	"clock",
+	"serde",
+] }
 
 
 [dev-dependencies]

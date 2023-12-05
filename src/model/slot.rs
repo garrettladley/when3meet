@@ -1,9 +1,9 @@
 use chrono::{DateTime, Duration, Utc};
 
-#[derive(Debug, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq)]
 pub struct Slot {
-    start: DateTime<Utc>,
-    end: DateTime<Utc>,
+    pub start: DateTime<Utc>,
+    pub end: DateTime<Utc>,
 }
 
 impl Slot {

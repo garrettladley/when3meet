@@ -1,6 +1,6 @@
 use unicode_segmentation::UnicodeSegmentation;
 
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug)]
 pub struct SafeString(String);
 
 impl SafeString {
