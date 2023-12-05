@@ -15,7 +15,6 @@ pub struct DBMeeting {
 
 cfg_if! {
     if #[cfg(feature = "ssr")] {
-        use std::error::Error;
         use crate::model::time_strings::iso8601;
         use sqlx::{FromRow, sqlite::SqliteRow, Row};
 

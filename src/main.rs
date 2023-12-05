@@ -4,14 +4,9 @@ cfg_if! {
     if #[cfg(feature = "ssr")] {
         use actix_files::{Files};
         use actix_web::*;
-        use crate::todo::*;
+        use crate::components::App;
         use leptos::*;
         use leptos_actix::{generate_route_list, LeptosRoutes};
-
-        #[get("/style.css")]
-        async fn css() -> impl Responder {
-            actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
-        }
 
         #[tokio::main]
         async fn main() -> std::io::Result<()> {
@@ -19,16 +14,15 @@ cfg_if! {
 
             let addr = conf.leptos_options.site_addr;
 
-            let routes = generate_route_list(TodoApp);
+            let routes = generate_route_list(App);
 
             HttpServer::new(move || {
                 let leptos_options = &conf.leptos_options;
                 let site_root = &leptos_options.site_root;
                 let routes = &routes;
                 App::new()
-                    .service(css)
                     .route("/api/{tail:.*}", leptos_actix::handle_server_fns())
-                    .leptos_routes(leptos_options.to_owned(), routes.to_owned(), TodoApp)
+                    .leptos_routes(leptos_options.to_owned(), routes.to_owned(), App)
                     .service(Files::new("/", site_root))
                     .wrap(middleware::Compress::default())
             })
@@ -39,7 +33,6 @@ cfg_if! {
         Ok(())
         }
     } else {
-        fn main() {
-        }
+        fn main() {}
     }
 }

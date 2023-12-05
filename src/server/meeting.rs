@@ -99,6 +99,8 @@ impl TryInto<DBMeeting> for RawMeeting {
 
 #[server(CreateMeeting, "/api")]
 pub async fn create_meeting(raw_meeting: RawMeeting) -> Result<(), ServerFnError> {
+    use crate::server::db::db;
+
     let mut conn = db().await?;
 
     let meeting = raw_meeting.try_into()?;
