@@ -35,7 +35,20 @@ pub async fn get_meeting() -> Result<Meeting, ServerFnError> {
 
     let meeting = result.into_iter().next();
 
-    Ok(meeting)
+    match meeting {
+        Some((meeting, user)) => Ok(Meeting {
+            meeting: DBMeeting {
+                id: meeting.id,
+                name: meeting.name,
+                start: meeting.start,
+                end: meeting.end,
+                no_earlier_than: meeting.no_earlier_than,
+                no_later_than: meeting.no_later_than,
+            },
+            users: vec![user],
+        }),
+        None => return Err(ServerFnError::ServerError("No meeting found".to_string())),
+    }
 }
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Debug)]
@@ -102,13 +115,16 @@ pub async fn create_meeting(raw_meeting: RawMeeting) -> Result<(), ServerFnError
     use crate::server::db::db;
 
     let mut conn = db().await?;
+    let meeting: DBMeeting = raw_meeting.try_into()?;
 
-    let meeting = raw_meeting.try_into()?;
-
-    sqlx::query("INSERT INTO meeting (name, description, slots) VALUES ($1, $2, $3)")
-        .bind(title)
-        .bind(description)
-        .bind(slots)
+    sqlx::query("INSERT INTO meeting (name, start_date, end_date, no_earlier_than_hr, no_earlier_than_min, no_later_than_hr, no_later_than_min) VALUES ($1, $2, $3, $4, $5, $6, $7)")
+        .bind(&meeting.name.as_ref())
+        .bind(&meeting.start.to_rfc3339())
+        .bind(&meeting.end.to_rfc3339())
+        .bind(meeting.no_earlier_than.hour)
+        .bind(meeting.no_earlier_than.minute)
+        .bind(meeting.no_later_than.hour)
+        .bind(meeting.no_later_than.minute)
         .execute(&mut conn)
         .await?;
 

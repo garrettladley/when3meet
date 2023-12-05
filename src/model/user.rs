@@ -10,8 +10,8 @@ pub struct User {
 
 cfg_if! {
     if #[cfg(feature = "ssr")] {
-        use std::error::Error;
         use sqlx::{FromRow, sqlite::SqliteRow, Row};
+        use crate::model::fold;
 
         impl FromRow<'_, SqliteRow> for User {
             fn from_row(row: &SqliteRow) -> sqlx::Result<Self> {
@@ -44,5 +44,24 @@ cfg_if! {
                 })
             }
         }
+
+        impl sqlx::Decode<'_, sqlx::sqlite::Sqlite> for User {
+            fn decode(
+                value: sqlx::sqlite::SqliteValueRef<'_>,
+            ) -> Result<Self, Box<dyn std::error::Error + 'static + Send + Sync>> {
+                let mut row = value.try_into_row()?;
+                Ok(Self::from_row(&mut row)?)
+            }
+        }
+
+        #[derive(sqlx::Type)]
+        pub struct UserTuple(pub i64, pub String, pub String);
+
+        impl sqlx::Type<sqlx::sqlite::Sqlite> for UserTuple {
+            fn type_info() -> sqlx::sqlite::SqliteTypeInfo {
+                <Self as sqlx::Type<sqlx::sqlite::Sqlite>>::type_info()
+            }
+        }
+
     }
 }

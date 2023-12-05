@@ -71,5 +71,31 @@ cfg_if! {
                 })
             }
         }
+
+        impl sqlx::Decode<'_, sqlx::sqlite::Sqlite> for DBMeeting {
+            fn decode(
+                value: sqlx::sqlite::SqliteValueRef<'_>,
+            ) -> Result<Self, Box<dyn std::error::Error + 'static + Send + Sync>> {
+                let mut row = value.try_into_row()?;
+                Ok(Self::from_row(&mut row)?)
+            }
+        }
+
+        #[derive(sqlx::Type)]
+        pub struct DBMeetingTuple(
+            pub String,
+            pub String,
+            pub String,
+            pub i8,
+            pub i8,
+            pub i8,
+            pub i8,
+        );
+
+        impl sqlx::Type<sqlx::sqlite::Sqlite> for DbMeetingTuple {
+            fn type_info() -> sqlx::sqlite::SqliteTypeInfo {
+                <Self as sqlx::Type<sqlx::sqlite::Sqlite>>::type_info()
+            }
+        }
     }
 }
