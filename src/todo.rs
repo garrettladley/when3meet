@@ -20,7 +20,7 @@ cfg_if! {
             let db_file_path = "./when3meet.db";
 
             if !std::path::Path::new(&db_file_path).exists() {
-                std::fs::File::create(&db_file_path)
+                std::fs::File::create(db_file_path)
                     .map_err(|err| {
                         ServerFnError::Args(format!("Failed to create database file: {}", err))
             })?;
