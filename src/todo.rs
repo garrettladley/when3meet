@@ -98,7 +98,6 @@ pub fn Todos() -> impl IntoView {
     let delete_todo = create_server_action::<DeleteTodo>();
     let submissions = add_todo.submissions();
 
-    // list of todos is loaded from the server in reaction to changes
     let todos = create_resource(
         move || (add_todo.version().get(), delete_todo.version().get()),
         move |_| get_todos(),
@@ -107,14 +106,9 @@ pub fn Todos() -> impl IntoView {
     view! {
         <div>
             <MultiActionForm
-                // we can handle client-side validation in the on:submit event
-                // leptos_router implements a `FromFormData` trait that lets you
-                // parse deserializable types from form data and check them
                 on:submit=move |ev| {
                     let data = AddTodo::from_event(&ev).expect("to parse form data");
-                    // silly example of validation: if the todo is "nope!", nope it
                     if data.title == "nope!" {
-                        // ev.prevent_default() will prevent form submission
                         ev.prevent_default();
                     }
                 }
