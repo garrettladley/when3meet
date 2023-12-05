@@ -5,7 +5,7 @@ use chrono::{DateTime, Utc};
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct DBMeeting {
-    pub id: i64,
+    pub id: Option<i64>,
     pub name: SafeString,
     pub start: DateTime<Utc>,
     pub end: DateTime<Utc>,
@@ -17,7 +17,6 @@ cfg_if! {
     if #[cfg(feature = "ssr")] {
         use std::error::Error;
         use crate::model::time_strings::iso8601;
-        use crate::model::timestamp::Timestamp24Hr;
         use sqlx::{FromRow, sqlite::SqliteRow, Row};
 
         impl FromRow<'_, SqliteRow> for DBMeeting {
@@ -25,7 +24,7 @@ cfg_if! {
                 let construct_err = |name: &str, message: &str| {
                     sqlx::Error::ColumnDecode {
                         index: name.to_string(),
-                        source: Box::new(std::io::Error(message.to_string())),
+                        source: Box::new(std::io::Error::new(std::io::ErrorKind::Other, message.to_string())),
                     }
                 };
 
@@ -46,7 +45,7 @@ cfg_if! {
                 let end = match iso8601(end) {
                     Ok(end) => end,
                     Err(_) => return Err(construct_err("end", "Invalid ISO8601")),
-                }
+                };
 
 
                 let net_hr = row.try_get("no_earlier_than_hr")?;

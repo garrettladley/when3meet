@@ -1,3 +1,4 @@
+use crate::model::iso8601;
 use chrono::{DateTime, Duration, Utc};
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, PartialEq)]
@@ -12,6 +13,19 @@ impl Slot {
             start,
             end: start + Duration::minutes(15),
         }
+    }
+}
+
+impl TryFrom<&str> for Slot {
+    type Error = String;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let start = match iso8601(value) {
+            Ok(start) => start.with_timezone(&Utc),
+            Err(_) => return Err("Invalid DateTime".to_string()),
+        };
+
+        Ok(Self::new(start))
     }
 }
 

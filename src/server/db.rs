@@ -3,6 +3,7 @@ use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "ssr")] {
         use sqlx::{Connection, SqliteConnection};
+        use leptos::ServerFnError;
 
         pub async fn db() -> Result<SqliteConnection, ServerFnError> {
             let db_file_path = "./when3meet.db";
