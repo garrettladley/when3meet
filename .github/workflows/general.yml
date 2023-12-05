@@ -45,8 +45,10 @@ jobs:
         working-directory: ./backend/
       - name: Check .sqlx/ is up-to-date
         run: cargo sqlx prepare --check -- --bin when3meet
+        working-directory: ./backend/
       - name: Run tests
         run: cargo test
+        working-directory: ./backend/
 
   fmt:
     name: Rustfmt
@@ -58,6 +60,7 @@ jobs:
           components: rustfmt
       - name: Enforce formatting
         run: cargo fmt --check
+        working-directory: ./backend/
 
   clippy:
     name: Clippy
@@ -92,6 +95,7 @@ jobs:
         working-directory: ./backend/
       - name: Linting
         run: cargo clippy -- -D warnings
+        working-directory: ./backend/
 
   coverage:
     name: Code coverage
@@ -127,3 +131,4 @@ jobs:
         working-directory: ./backend/
       - name: Generate code coverage
         run: cargo tarpaulin --verbose --workspace
+        working-directory: ./backend/
