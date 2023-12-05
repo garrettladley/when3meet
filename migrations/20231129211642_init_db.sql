@@ -12,9 +12,9 @@ DROP TABLE IF EXISITS users;
 
 CREATE TABLE IF NOT EXISTS users
 (
-  id          INTEGER NOT NULL PRIMARY KEY,
-  name        TEXT,
-  availability TEXT, 
+  id            INTEGER NOT NULL PRIMARY KEY,
+  name          TEXT,
+  availability  TEXT,
+  meeting_id    INTEGER,
   FOREIGN KEY (meeting_id) REFERENCES meetings(id)
 );
-
