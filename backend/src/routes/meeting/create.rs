@@ -82,13 +82,13 @@ pub async fn insert_applicant(
     let id = uuid::Uuid::new_v4();
 
     sqlx::query!("INSERT INTO meetings (id, name, start_date, end_date, no_earlier_than_hr, no_earlier_than_min, no_later_than_hr, no_later_than_min) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
-    id, 
+    id,
     insert_meeting.name.as_ref(), 
-    insert_meeting.start, 
-    insert_meeting.end, 
-    insert_meeting.no_earlier_than.hour as i16, 
-    insert_meeting.no_earlier_than.minute as i16, 
-    insert_meeting.no_later_than.hour as i16, 
+    insert_meeting.start,
+    insert_meeting.end,
+    insert_meeting.no_earlier_than.hour as i16,
+    insert_meeting.no_earlier_than.minute as i16,
+    insert_meeting.no_later_than.hour as i16,
     insert_meeting.no_later_than.minute as i16)
         .execute(pool)
         .await?;

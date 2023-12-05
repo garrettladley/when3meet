@@ -41,7 +41,7 @@ jobs:
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
-          SKIP_DOCKER=true ./scripts/init_db.sh
+          SKIP_DOCKER=true ./backend/scripts/init_db.sh
       - name: Check .sqlx/ is up-to-date
         run: |
           cargo sqlx prepare --check -- --bin when3meet
@@ -88,7 +88,7 @@ jobs:
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
-          SKIP_DOCKER=true ./scripts/init_db.sh
+          SKIP_DOCKER=true ./backend/scripts/init_db.sh
       - name: Linting
         run: cd ./backend/ && cargo clippy -- -D warnings
 
@@ -122,6 +122,6 @@ jobs:
           --no-default-features
           --locked
       - name: Migrate database
-        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        run: SKIP_DOCKER=true ./backend/scripts/init_db.sh
       - name: Generate code coverage
         run: cd ./backend/ && cargo tarpaulin --verbose --workspace
