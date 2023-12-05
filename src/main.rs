@@ -14,10 +14,8 @@ cfg_if! {
             actix_files::NamedFile::open_async("target/site/pkg/when3meet.css").await
         }
 
-        #[actix_web::main]
+        #[tokio::main]
         async fn main() -> std::io::Result<()> {
-            db().await.expect("couldn't connect to DB");
-
             let conf = get_configuration(None).await.unwrap();
 
             let addr = conf.leptos_options.site_addr;
@@ -28,7 +26,6 @@ cfg_if! {
                 let leptos_options = &conf.leptos_options;
                 let site_root = &leptos_options.site_root;
                 let routes = &routes;
-
                 App::new()
                     .service(css)
                     .route("/api/{tail:.*}", leptos_actix::handle_server_fns())
@@ -38,7 +35,9 @@ cfg_if! {
             })
             .bind(addr)?
             .run()
-            .await
+            .await?;
+
+        Ok(())
         }
     } else {
         fn main() {

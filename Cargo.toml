@@ -23,12 +23,22 @@ leptos_router = { version = "0.5.4" }
 log = "0.4.17"
 simple_logger = "4.0.0"
 gloo = { git = "https://github.com/rustwasm/gloo" }
-sqlx = { version = "0.6.2", features = [
+sqlx = { version = "0.7.3", features = [
 	"runtime-tokio-rustls",
 	"sqlite",
 ], optional = true }
 wasm-bindgen = "0.2"
-tokio = { version = "1", features = ["rt", "time"], optional = true }
+tokio = { version = "1", features = [
+	"rt",
+	"time",
+	"macros",
+	"rt-multi-thread",
+], optional = true }
+serde-aux = "4"
+secrecy = { version = "0.8", features = ["serde"] }
+config = { version = "0.13", default-features = false, features = ["yaml"] }
+tracing = "0.1.40"
+
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
