@@ -25,7 +25,7 @@ impl TryFrom<BodyData> for InsertMeeting {
             Timestamp24Hr::new(body.no_earlier_than_hr, body.no_earlier_than_min)?;
         let no_later_than = Timestamp24Hr::new(body.no_later_than_hr, body.no_later_than_min)?;
 
-        Ok(InsertMeeting {
+        Ok(Self {
             name,
             start,
             end,
@@ -83,7 +83,7 @@ pub async fn insert_applicant(
 
     sqlx::query!("INSERT INTO meetings (id, name, start_date, end_date, no_earlier_than_hr, no_earlier_than_min, no_later_than_hr, no_later_than_min) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
     id,
-    insert_meeting.name.as_ref(), 
+    insert_meeting.name.as_ref(),
     insert_meeting.start,
     insert_meeting.end,
     insert_meeting.no_earlier_than.hr as i8,

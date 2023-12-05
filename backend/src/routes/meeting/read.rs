@@ -1,9 +1,9 @@
+use crate::model::slot::availability;
 use crate::model::{
-    fold, iso8601, DBMeeting, InsertMeeting, Meeting, SafeString, Slot, Timestamp24Hr, User,
+    DBMeeting, InsertMeeting, InsertUser, Meeting, SafeString, Timestamp24Hr, User,
 };
 use crate::routes::convert_err;
 use actix_web::{web, HttpResponse};
-use chrono::Utc;
 use sqlx::PgPool;
 
 #[tracing::instrument(
@@ -89,32 +89,21 @@ pub async fn select_meeting(pool: &PgPool, id: &uuid::Uuid) -> Result<Meeting, s
             .await?
             .into_iter()
             .map(|record| {
-                let slots: Vec<Slot> = fold(
-                    record
-                        .availability
-                        .split('|')
-                        .filter_map(|pair| {
-                            let timestamps: Vec<&str> = pair.split('_').collect();
-                            let start = match iso8601(timestamps[0]) {
-                                Ok(start) => start.with_timezone(&Utc),
-                                Err(_) => return None,
-                            };
-
-                            let end = match iso8601(timestamps[1]) {
-                                Ok(end) => end.with_timezone(&Utc),
-                                Err(_) => return None,
-                            };
-
-                            Some(Slot { start, end })
-                        })
-                        .collect(),
-                );
-
-                User {
+                let user = User {
                     id: record.id,
-                    name: SafeString(record.name),
-                    slots,
-                }
+                    user: InsertUser {
+                        name: SafeString::parse(record.name).map_err(|_| {
+                            convert_err("name", "Safe String contraint failed on name column.")
+                        })?,
+                        slots: availability(&record.availability).map_err(|_| {
+                            convert_err(
+                                "availability",
+                                "Slot formatting contraints failed on availability column.",
+                            )
+                        })?,
+                    },
+                };
+                Ok(user)
             })
             .collect();
 

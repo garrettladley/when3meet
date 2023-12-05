@@ -1,9 +1,8 @@
-use crate::model::{SafeString, Slot};
+use crate::model::InsertUser;
 use uuid::Uuid;
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct User {
     pub id: Uuid,
-    pub name: SafeString,
-    pub slots: Vec<Slot>,
+    pub user: InsertUser,
 }

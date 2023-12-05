@@ -44,6 +44,26 @@ pub fn fold(slots: Vec<Slot>) -> Vec<Slot> {
         })
 }
 
+pub fn availability(raw: &str) -> Result<Vec<Slot>, String> {
+    match raw
+        .split('|')
+        .map(|pair| {
+            let timestamps: Vec<&str> = pair.split('_').collect();
+            let start = iso8601(timestamps[0])
+                .map_err(|e| e.to_string())?
+                .with_timezone(&Utc);
+            let end = iso8601(timestamps[1])
+                .map_err(|e| e.to_string())?
+                .with_timezone(&Utc);
+            Ok(Slot { start, end })
+        })
+        .collect::<Result<Vec<Slot>, String>>()
+    {
+        Ok(slots) => Ok(fold(slots)),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::model::{fold, Slot};
