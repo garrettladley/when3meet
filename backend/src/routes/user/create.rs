@@ -1,7 +1,7 @@
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 
-use crate::model::{availability, InsertUser, SafeString};
+use crate::model::{availability::Availability, InsertUser, SafeString};
 
 #[derive(serde::Deserialize)]
 pub struct BodyData {
@@ -14,12 +14,9 @@ impl TryFrom<BodyData> for InsertUser {
 
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
         let name = SafeString::parse(body.name)?;
-        let availability = availability(&body.availability)?;
+        let availability = Availability::try_from(body.availability.as_ref())?;
 
-        Ok(Self {
-            name,
-            slots: availability,
-        })
+        Ok(Self { name, availability })
     }
 }
 #[tracing::instrument(

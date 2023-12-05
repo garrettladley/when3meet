@@ -1,9 +1,8 @@
-use sqlx::PgPool;
-
 use crate::{
-    model::{availability, InsertUser, SafeString, User},
+    model::{Availability, InsertUser, SafeString, User},
     routes::convert_err,
 };
+use sqlx::PgPool;
 
 pub async fn select_user_by_meeting_id(
     pool: &PgPool,
@@ -26,15 +25,40 @@ pub async fn select_user_by_meeting_id(
                 name: SafeString::parse(record.name).map_err(|_| {
                     convert_err("name", "Safe String contraint failed on name column.")
                 })?,
-                slots: availability(&record.availability).map_err(|_| {
-                    convert_err(
-                        "availability",
-                        "Slot formatting contraints failed on availability column.",
-                    )
-                })?,
+                availability: Availability::try_from(record.availability.as_ref()).map_err(
+                    |e| {
+                        convert_err(
+                            "availability",
+                            format!(
+                                "Availability contraint failed on availability column. {}",
+                                e
+                            )
+                            .as_str(),
+                        )
+                    },
+                )?,
             },
         };
         Ok(user)
     })
     .collect::<Result<Vec<_>, _>>()
+}
+
+pub async fn insert_user(
+    pool: &PgPool,
+    meeting_id: &uuid::Uuid,
+    user: &InsertUser,
+) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        INSERT INTO users (name, availability, meeting_id)
+        VALUES ($1, $2, $3)
+        "#,
+        user.name.as_ref(),
+        user.availability.to_string(),
+        meeting_id,
+    )
+    .execute(pool)
+    .await?;
+    Ok(())
 }
