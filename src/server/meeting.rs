@@ -5,6 +5,7 @@ use leptos::{server, ServerFnError};
 pub async fn get_meeting() -> Result<Meeting, ServerFnError> {
     use crate::model::DBMeeting;
     use crate::model::User;
+    use crate::server::db::db;
 
     let mut conn = db().await?;
 

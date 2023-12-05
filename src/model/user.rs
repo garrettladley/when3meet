@@ -31,8 +31,8 @@ cfg_if! {
                     Err(_) => return Err(construct_err("name", "Invalid SafeString")),
                 };
 
-                let availability = row.try_get("availability")?;
-                let availability: Result<Vec<Slot>, _> = availability.split('|').map(|slot| Slot::try_from(slot)).collect();
+                let availability: String = row.try_get("availability")?;
+                let availability: Result<Vec<Slot>, String> = availability.split('|').map(|slot| Slot::try_from(slot)).collect();
                 let availability = match availability {
                     Ok(availability) => fold(availability),
                     Err(_) => return Err(construct_err("availability", "Invalid Availability")),
