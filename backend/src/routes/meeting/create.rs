@@ -1,7 +1,6 @@
+use crate::model::{iso8601, InsertMeeting, SafeString, Timestamp24Hr};
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
-
-use crate::model::{iso8601, InsertMeeting, SafeString, Timestamp24Hr};
 
 #[derive(serde::Deserialize)]
 pub struct BodyData {
@@ -54,7 +53,7 @@ pub struct CreateResponseData {
     )
 )]
 pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) -> HttpResponse {
-    let insert_meeting = match InsertMeeting::try_from(body.into_inner()) {
+    let meeting = match InsertMeeting::try_from(body.into_inner()) {
         Ok(meeting) => meeting,
         Err(e) => {
             tracing::error!("Failed to parse meeting data: {:?}", e);
@@ -62,7 +61,7 @@ pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) 
         }
     };
 
-    match insert_applicant(&pool, &insert_meeting).await {
+    match insert_meeting(&pool, &meeting).await {
         Ok(response) => HttpResponse::Ok().json(response),
         Err(e) => {
             tracing::error!("Failed to insert meeting into database: {:?}", e);
@@ -73,25 +72,13 @@ pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) 
 
 #[tracing::instrument(
     name = "Inserting new meeting details into the database.",
-    skip(insert_meeting, pool)
+    skip(meeting, pool)
 )]
-pub async fn insert_applicant(
+pub async fn insert_meeting(
     pool: &PgPool,
-    insert_meeting: &InsertMeeting,
+    meeting: &InsertMeeting,
 ) -> Result<CreateResponseData, sqlx::Error> {
-    let id = uuid::Uuid::new_v4();
-
-    sqlx::query!("INSERT INTO meetings (id, name, start_date, end_date, no_earlier_than_hr, no_earlier_than_min, no_later_than_hr, no_later_than_min) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
-    id,
-    insert_meeting.name.as_ref(),
-    insert_meeting.start,
-    insert_meeting.end,
-    insert_meeting.no_earlier_than.hr as i8,
-    insert_meeting.no_earlier_than.min as i8,
-    insert_meeting.no_later_than.hr as i8,
-    insert_meeting.no_later_than.min as i8)
-        .execute(pool)
-        .await?;
-
-    Ok(CreateResponseData { id })
+    Ok(CreateResponseData {
+        id: crate::transactions::insert_meeting(pool, meeting).await?,
+    })
 }
