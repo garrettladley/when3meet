@@ -41,12 +41,12 @@ jobs:
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
-          SKIP_DOCKER=true ./backend/scripts/init_db.sh
+          SKIP_DOCKER=true ./scripts/init_db.sh
+        working-directory: ./backend/
       - name: Check .sqlx/ is up-to-date
-        run: |
-          cargo sqlx prepare --check -- --bin when3meet
+        run: cargo sqlx prepare --check -- --bin when3meet
       - name: Run tests
-        run: cd ./backend/ && cargo test
+        run: cargo test
 
   fmt:
     name: Rustfmt
@@ -57,7 +57,7 @@ jobs:
         with:
           components: rustfmt
       - name: Enforce formatting
-        run: cd ./backend/ && cargo fmt --check
+        run: cargo fmt --check
 
   clippy:
     name: Clippy
@@ -88,9 +88,10 @@ jobs:
       - name: Migrate database
         run: |
           sudo apt-get install libpq-dev -y
-          SKIP_DOCKER=true ./backend/scripts/init_db.sh
+          SKIP_DOCKER=true ./scripts/init_db.sh
+        working-directory: ./backend/
       - name: Linting
-        run: cd ./backend/ && cargo clippy -- -D warnings
+        run: cargo clippy -- -D warnings
 
   coverage:
     name: Code coverage
@@ -122,6 +123,7 @@ jobs:
           --no-default-features
           --locked
       - name: Migrate database
-        run: SKIP_DOCKER=true ./backend/scripts/init_db.sh
+        run: SKIP_DOCKER=true ./scripts/init_db.sh
+        working-directory: ./backend/
       - name: Generate code coverage
-        run: cd ./backend/ && cargo tarpaulin --verbose --workspace
+        run: cargo tarpaulin --verbose --workspace
