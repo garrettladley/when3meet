@@ -8,10 +8,6 @@
     <img src="https://github.com/garrettladley/when3meet/actions/workflows/backend.yml/badge.svg"
       alt="Backend Workflow Status" />
   </a>
-  <a href="https://github.com/garrettladley/when3meet/actions/workflows/frontend.yml">
-    <img src="https://github.com/garrettladley/when3meet/actions/workflows/frontend.yml/badge.svg"
-      alt="Frontend Workflow Status" />
-  </a>
   <a href="https://github.com/garrettladley/when3meet/actions/workflows/audit.yml">
     <img src="https://github.com/garrettladley/when3meet/actions/workflows/audit.yml/badge.svg"
     alt="Security Audit Workflow Status" />
