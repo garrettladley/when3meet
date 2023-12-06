@@ -15,10 +15,10 @@ pub async fn insert_meeting(
     insert_meeting.name.as_ref(),
     insert_meeting.start,
     insert_meeting.end,
-    insert_meeting.no_earlier_than.hr as i8,
-    insert_meeting.no_earlier_than.min as i8,
-    insert_meeting.no_later_than.hr as i8,
-    insert_meeting.no_later_than.min as i8)
+    insert_meeting.no_earlier_than.hr,
+    insert_meeting.no_earlier_than.min,
+    insert_meeting.no_later_than.hr,
+    insert_meeting.no_later_than.min)
         .execute(pool)
         .await?;
 
@@ -35,10 +35,10 @@ pub async fn select_meeting(pool: &PgPool, id: &uuid::Uuid) -> Result<DBMeeting,
             Err(sqlx::Error::RowNotFound)
         }
         Some(record) => {
-            let no_earlier_than_hr = record.no_earlier_than_hr as i8;
-            let no_earlier_than_min = record.no_earlier_than_min as i8;
-            let no_later_than_hr = record.no_later_than_hr as i8;
-            let no_later_than_min = record.no_later_than_min as i8;
+            let no_earlier_than_hr = record.no_earlier_than_hr;
+            let no_earlier_than_min = record.no_earlier_than_min;
+            let no_later_than_hr = record.no_later_than_hr;
+            let no_later_than_min = record.no_later_than_min;
 
             Ok(DBMeeting {
                 id: record.id,
@@ -48,26 +48,20 @@ pub async fn select_meeting(pool: &PgPool, id: &uuid::Uuid) -> Result<DBMeeting,
                     })?,
                     start: record.end_date,
                     end: record.end_date,
-                    no_earlier_than: Timestamp24Hr::new(
-                        no_earlier_than_hr as u8,
-                        no_earlier_than_min as u8,
-                    )
-                    .map_err(|_| {
-                        convert_err(
-                            "no_earlier_than",
-                            "Timestamp24Hr contraint failed on no_earlier_than column.",
-                        )
-                    })?,
-                    no_later_than: Timestamp24Hr::new(
-                        no_later_than_hr as u8,
-                        no_later_than_min as u8,
-                    )
-                    .map_err(|_| {
-                        convert_err(
-                            "no_later_than",
-                            "Timestamp24Hr contraint failed on no_later_than column.",
-                        )
-                    })?,
+                    no_earlier_than: Timestamp24Hr::new(no_earlier_than_hr, no_earlier_than_min)
+                        .map_err(|_| {
+                            convert_err(
+                                "no_earlier_than",
+                                "Timestamp24Hr contraint failed on no_earlier_than column.",
+                            )
+                        })?,
+                    no_later_than: Timestamp24Hr::new(no_later_than_hr, no_later_than_min)
+                        .map_err(|_| {
+                            convert_err(
+                                "no_later_than",
+                                "Timestamp24Hr contraint failed on no_later_than column.",
+                            )
+                        })?,
                 },
             })
         }

@@ -7,10 +7,10 @@ pub struct BodyData {
     pub name: String,
     pub start_date: String,
     pub end_date: String,
-    pub no_earlier_than_hr: u8,
-    pub no_earlier_than_min: u8,
-    pub no_later_than_hr: u8,
-    pub no_later_than_min: u8,
+    pub no_earlier_than_hr: i32,
+    pub no_earlier_than_min: i32,
+    pub no_later_than_hr: i32,
+    pub no_later_than_min: i32,
 }
 
 impl TryFrom<BodyData> for InsertMeeting {

@@ -1,13 +1,14 @@
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Timestamp24Hr {
-    pub hr: u8,
-    pub min: u8,
+    pub hr: i32,
+    pub min: i32,
 }
+
 impl Timestamp24Hr {
-    pub fn new(hr: u8, min: u8) -> Result<Self, String> {
-        if hr > 23 {
+    pub fn new(hr: i32, min: i32) -> Result<Self, String> {
+        if !(0..=23).contains(&hr) {
             Err(format!("Invalid hr: {}", hr))
-        } else if min > 59 {
+        } else if !(0..=59).contains(&min) {
             Err(format!("Invalid min: {}", min))
         } else {
             Ok(Self { hr, min })
