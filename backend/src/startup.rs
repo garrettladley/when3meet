@@ -1,4 +1,4 @@
-use crate::routes::{create_meeting, health_check, read_meeting};
+use crate::routes::{create_meeting, create_user, health_check, read_meeting, update_user};
 use actix_web::{dev::Server, web, App, HttpServer};
 use sqlx::PgPool;
 use std::net::TcpListener;
@@ -13,6 +13,11 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
                 web::scope("/meeting")
                     .route("/create", web::post().to(create_meeting))
                     .route("/{id}", web::get().to(read_meeting)),
+            )
+            .service(
+                web::scope("/user")
+                    .route("/create/{meeting_id}", web::post().to(create_user))
+                    .route("/update/{user_id}", web::post().to(update_user)),
             )
             .route("/health_check", web::get().to(health_check))
             .app_data(db_pool.clone())

@@ -4,6 +4,6 @@ pub mod user;
 pub mod utils;
 
 pub use health_check::health_check;
-pub use meeting::create_meeting;
-pub use meeting::read_meeting;
+pub use meeting::{create_meeting, read_meeting};
+pub use user::{create_user, update_user};
 pub use utils::convert_err;
