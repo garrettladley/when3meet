@@ -48,17 +48,20 @@ pub async fn insert_user(
     pool: &PgPool,
     meeting_id: &uuid::Uuid,
     user: &InsertUser,
-) -> Result<(), sqlx::Error> {
+) -> Result<uuid::Uuid, sqlx::Error> {
+    let id = uuid::Uuid::new_v4();
     sqlx::query!(
         r#"
-        INSERT INTO users (name, availability, meeting_id)
-        VALUES ($1, $2, $3)
+        INSERT INTO users (id, name, availability, meeting_id)
+        VALUES ($1, $2, $3, $4)
         "#,
+        id,
         user.name.as_ref(),
         user.availability.to_string(),
         meeting_id,
     )
     .execute(pool)
     .await?;
-    Ok(())
+
+    Ok(id)
 }
