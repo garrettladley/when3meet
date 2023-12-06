@@ -32,6 +32,9 @@ impl TryFrom<&str> for Availability {
                 .split('|')
                 .map(|pair| {
                     let timestamps: Vec<&str> = pair.split('_').collect();
+                    if timestamps.len() != 2 {
+                        return Err("Invalid slot pair".to_string());
+                    }
                     Slot::try_from((timestamps[0], timestamps[1]))
                 })
                 .collect::<Result<Vec<Slot>, String>>()
