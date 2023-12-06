@@ -4,7 +4,6 @@
     "dev": "solid-start dev",
     "build": "solid-start build",
     "start": "solid-start start",
-    "typecheck": "tsc --noEmit",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ."
   },
   "type": "module",

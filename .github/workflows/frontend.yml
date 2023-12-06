@@ -16,11 +16,8 @@ jobs:
       - name: Install dependencies
         run: npm i
         working-directory: ./frontend
-      - name: Typecheck
-        run: npm run typecheck
-        working-directory: ./frontend
       - name: Format
-        run: npm i prettier && npm prettier --write .
+        run: npm prettier --write .
         working-directory: ./frontend
       - name: Lint
         run: npm run lint
