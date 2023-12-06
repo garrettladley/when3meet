@@ -65,3 +65,20 @@ pub async fn insert_user(
 
     Ok(id)
 }
+
+pub async fn update_user(pool: &PgPool, user: &User) -> Result<(), sqlx::Error> {
+    sqlx::query!(
+        r#"
+        UPDATE users
+        SET name = $1, availability = $2
+        WHERE id = $3
+        "#,
+        user.user.name.as_ref(),
+        user.user.availability.to_string(),
+        user.id,
+    )
+    .execute(pool)
+    .await?;
+
+    Ok(())
+}
