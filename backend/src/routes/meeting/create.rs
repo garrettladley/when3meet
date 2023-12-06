@@ -57,7 +57,7 @@ pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) 
     };
 
     match insert_meeting(&pool, &meeting).await {
-        Ok(response) => HttpResponse::Ok().json(response),
+        Ok(response) => HttpResponse::Ok().body(response.to_string()),
         Err(e) => {
             tracing::error!("Failed to insert meeting into database: {:?}", e);
             HttpResponse::InternalServerError().finish()

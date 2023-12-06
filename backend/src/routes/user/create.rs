@@ -35,7 +35,7 @@ pub async fn create_user(
     };
 
     match insert_user(&pool, &meeting_id, &user).await {
-        Ok(user_id) => HttpResponse::Ok().json(user_id),
+        Ok(user_id) => HttpResponse::Ok().body(user_id.to_string()),
         Err(e) => {
             tracing::error!("Failed to insert user: {}", e);
             HttpResponse::InternalServerError().json("Failed to insert user.")

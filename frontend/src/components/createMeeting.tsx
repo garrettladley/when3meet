@@ -1,5 +1,9 @@
 import { createSignal } from "solid-js";
 
+import { useNavigate } from "@solidjs/router";
+
+import { API_BASE_URL } from "../consts";
+
 const getDefaultDate = () => {
   const date = new Date();
   date.setHours(0, 0, 0, 0);
@@ -20,6 +24,8 @@ const getDefaultTime = (hours: number, minutes: number): string => {
 };
 
 const CreateMeeting = () => {
+  const navigate = useNavigate();
+
   const [meetingName, setMeetingName] = createSignal<string>("");
   const [startDate, setStartDate] = createSignal<string>(getDefaultDate());
   const [endDate, setEndDate] = createSignal<string>(getDefaultEndDate());
@@ -51,7 +57,7 @@ const CreateMeeting = () => {
 
   const createMeeting = async () => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/meeting/create", {
+      const response = await fetch(`${API_BASE_URL}/meeting/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -71,9 +77,7 @@ const CreateMeeting = () => {
 
       if (response.ok) {
         const meetingId = await response.text();
-        console.log(
-          `Meeting created successfully. Redirecting to /meeting/${meetingId}`
-        );
+        navigate(`/${meetingId}`);
       } else {
         console.error("Failed to create meeting");
       }

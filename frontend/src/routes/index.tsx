@@ -1,4 +1,3 @@
-import { A } from "solid-start";
 import CreateMeeting from "~/components/createMeeting";
 
 export default function Home() {
