@@ -11,6 +11,14 @@
     "baseUrl": "./",
     "paths": {
       "~/*": ["./src/*"]
-    }
-  }
+    },
+  },
+  "include": [
+    ".eslintrc.cjs",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.cjs",
+    "**/*.mjs"
+  ],
+  "exclude": ["node_modules"]
 }
