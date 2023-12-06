@@ -34,11 +34,23 @@ pub async fn create_user(
         }
     };
 
-    match crate::transactions::user::insert_user(&pool, &meeting_id, &user).await {
+    match insert_user(&pool, &meeting_id, &user).await {
         Ok(user_id) => HttpResponse::Ok().json(user_id),
         Err(e) => {
             tracing::error!("Failed to insert user: {}", e);
             HttpResponse::InternalServerError().json("Failed to insert user.")
         }
     }
+}
+
+#[tracing::instrument(
+    name = "Inserting a user for the given meeting ID.",
+    skip(pool, meeting_id, user)
+)]
+pub async fn insert_user(
+    pool: &PgPool,
+    meeting_id: &uuid::Uuid,
+    user: &InsertUser,
+) -> Result<uuid::Uuid, sqlx::Error> {
+    crate::transactions::user::insert_user(pool, meeting_id, user).await
 }

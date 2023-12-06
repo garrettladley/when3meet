@@ -35,13 +35,16 @@ pub async fn update_user(
         }
     };
 
-    let user = User { id: user_id, user };
-
-    match crate::transactions::user::update_user(&pool, &user).await {
+    match update_user_db(&pool, &User { id: user_id, user }).await {
         Ok(user_id) => HttpResponse::Ok().json(user_id),
         Err(e) => {
             tracing::error!("Failed to insert user: {}", e);
             HttpResponse::InternalServerError().json("Failed to insert user.")
         }
     }
+}
+
+#[tracing::instrument(name = "Updating a user for the given user ID.", skip(pool, user))]
+pub async fn update_user_db(pool: &PgPool, user: &User) -> Result<(), sqlx::Error> {
+    crate::transactions::user::update_user(pool, user).await
 }

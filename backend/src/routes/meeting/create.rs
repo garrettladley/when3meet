@@ -34,11 +34,6 @@ impl TryFrom<BodyData> for InsertMeeting {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
-pub struct CreateResponseData {
-    pub id: uuid::Uuid,
-}
-
 #[tracing::instrument(
     name = "Creating a new meeting.",
     skip(body, pool),
@@ -72,13 +67,11 @@ pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) 
 
 #[tracing::instrument(
     name = "Inserting new meeting details into the database.",
-    skip(meeting, pool)
+    skip(pool, meeting)
 )]
 pub async fn insert_meeting(
     pool: &PgPool,
     meeting: &InsertMeeting,
-) -> Result<CreateResponseData, sqlx::Error> {
-    Ok(CreateResponseData {
-        id: crate::transactions::insert_meeting(pool, meeting).await?,
-    })
+) -> Result<uuid::Uuid, sqlx::Error> {
+    crate::transactions::insert_meeting(pool, meeting).await
 }
