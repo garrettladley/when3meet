@@ -45,18 +45,17 @@ impl TryFrom<&str> for Availability {
 
 impl std::fmt::Display for Availability {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let binding = self
-            .0
-            .iter()
-            .map(|slot| {
-                format!(
-                    "{}_{}|",
-                    slot.start.to_rfc3339_opts(SecondsFormat::Secs, true),
-                    slot.end.to_rfc3339_opts(SecondsFormat::Secs, true)
-                )
-            })
-            .collect::<String>();
+        let binding = self.0.iter().fold(String::new(), |mut binding, slot| {
+            binding.push_str(&format!(
+                "{}_{}|",
+                slot.start.to_rfc3339_opts(SecondsFormat::Secs, true),
+                slot.end.to_rfc3339_opts(SecondsFormat::Secs, true)
+            ));
+            binding
+        });
+
         let availability = binding.trim_end_matches('|');
+
         write!(f, "{}", availability)
     }
 }
