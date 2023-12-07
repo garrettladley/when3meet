@@ -66,7 +66,7 @@ pub async fn insert_user(
     Ok(id)
 }
 
-pub async fn update_user(pool: &PgPool, user: &User) -> Result<(), sqlx::Error> {
+pub async fn update_user(pool: &PgPool, user: &User) -> Result<uuid::Uuid, sqlx::Error> {
     sqlx::query!(
         r#"
         UPDATE users
@@ -80,5 +80,5 @@ pub async fn update_user(pool: &PgPool, user: &User) -> Result<(), sqlx::Error> 
     .execute(pool)
     .await?;
 
-    Ok(())
+    Ok(user.id)
 }
