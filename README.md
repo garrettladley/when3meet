@@ -13,3 +13,36 @@
     alt="Security Audit Workflow Status" />
   </a>
 </div>
+
+## Quick Start
+
+> [!NOTE]
+> The following are prerequisites for running the application. Please refer to their respective documentation to install the dependencies for your operating system.
+>
+> - Rust
+> - Docker
+> - Node
+
+### Backend
+
+***Ensure the Docker daemon is running***
+
+```bash
+cd backend
+./scripts/init_db.sh
+cargo run
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## External Libraries Used
+
+- [actix-web](https://actix.rs/): a web framework for Rust.
+- [sqlx](https://docs.rs/sqlx/latest/sqlx/): an asynchronous, pure Rust SQL crate featuring compile-time checked queries without a DSL.
+- [Solid.js](https://www.solidjs.com/): a declarative JavaScript library for building user interfaces.
