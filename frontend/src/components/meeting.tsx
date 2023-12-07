@@ -9,6 +9,7 @@ interface MeetingProps {
 
 export default function Meeting(props: MeetingProps) {
   const location = useLocation();
+
   const [meetingData, setMeetingData] = createSignal<MeetingT>();
 
   const fetchMeetingData = async () => {
