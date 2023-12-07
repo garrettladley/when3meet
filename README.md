@@ -46,3 +46,4 @@ npm run dev
 - [actix-web](https://actix.rs/): a web framework for Rust.
 - [sqlx](https://docs.rs/sqlx/latest/sqlx/): an asynchronous, pure Rust SQL crate featuring compile-time checked queries without a DSL.
 - [Solid.js](https://www.solidjs.com/): a declarative JavaScript library for building user interfaces.
+- [Tailwind CSS](https://tailwindcss.com/): a utility-first CSS framework for rapidly building custom user interfaces.
