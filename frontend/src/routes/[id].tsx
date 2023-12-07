@@ -4,5 +4,5 @@ import Meeting from "~/components/meeting";
 export default function MeetingDashboard() {
   const params = useParams();
 
-  return <Meeting meetingId={params.id} />;
+  return <Meeting id={params.id} />;
 }

@@ -1,25 +1,23 @@
 import { createSignal, onMount } from "solid-js";
-
-import { API_BASE_URL } from "../consts";
-import { Meeting as MeetingType } from "../main.types";
+import { API_BASE_URL } from "~/consts";
+import { Meeting } from "~/main.types";
 
 interface MeetingProps {
-  meetingId: string;
+  new?: boolean;
+  id: string;
+  meeting?: Meeting;
 }
 
 export default function Meeting(props: MeetingProps) {
-  const [meetingData, setMeetingData] = createSignal<MeetingType>();
+  const [meetingData, setMeetingData] = createSignal<Meeting>();
 
   const fetchMeetingData = async () => {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/meeting/${props.meetingId}`,
-        {
-          method: "GET",
-          mode: "cors",
-          credentials: "same-origin",
-        }
-      );
+      const response = await fetch(`${API_BASE_URL}/meeting/${props.id}`, {
+        method: "GET",
+        mode: "cors",
+        credentials: "same-origin",
+      });
       const data = await response.json();
       setMeetingData(data);
     } catch (error) {
@@ -28,7 +26,11 @@ export default function Meeting(props: MeetingProps) {
   };
 
   onMount(() => {
-    fetchMeetingData();
+    if (!props.meeting) {
+      fetchMeetingData();
+    } else {
+      setMeetingData(props.meeting);
+    }
   });
 
   return (
