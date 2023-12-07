@@ -29,6 +29,7 @@ export default function Meeting(props: MeetingProps) {
   onMount(() => {
     if (location.state) {
       setMeetingData(location.state as MeetingT);
+      location.state = null;
     } else {
       fetchMeetingData();
     }

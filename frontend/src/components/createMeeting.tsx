@@ -91,6 +91,7 @@ const CreateMeeting = () => {
               hour: parseInt(noLaterThan().split(":")[0]),
               minute: parseInt(noLaterThan().split(":")[1]),
             },
+            users: [],
           } as MeetingT,
         });
       } else {
