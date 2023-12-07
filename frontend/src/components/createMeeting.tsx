@@ -62,8 +62,6 @@ const CreateMeeting = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        mode: "cors",
-        credentials: "same-origin",
         body: JSON.stringify({
           name: meetingName(),
           start_date: new Date(startDate()).toISOString(),

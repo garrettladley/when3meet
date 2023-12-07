@@ -16,8 +16,6 @@ export default function Meeting(props: MeetingProps) {
     try {
       const response = await fetch(`${API_BASE_URL}/meeting/${props.id}`, {
         method: "GET",
-        mode: "cors",
-        credentials: "same-origin",
       });
       const data = await response.json();
       setMeetingData(data);
@@ -29,7 +27,6 @@ export default function Meeting(props: MeetingProps) {
   onMount(() => {
     if (location.state) {
       setMeetingData(location.state as MeetingT);
-      location.state = null;
     } else {
       fetchMeetingData();
     }
