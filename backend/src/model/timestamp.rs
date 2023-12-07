@@ -1,4 +1,6 @@
-#[derive(serde::Serialize, serde::Deserialize)]
+use std::cmp::Ordering;
+
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Eq)]
 pub struct Timestamp24Hr {
     pub hr: i32,
     pub min: i32,
@@ -13,6 +15,28 @@ impl Timestamp24Hr {
         } else {
             Ok(Self { hr, min })
         }
+    }
+}
+
+impl PartialOrd for Timestamp24Hr {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Timestamp24Hr {
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.hr != other.hr {
+            self.hr.cmp(&other.hr)
+        } else {
+            self.min.cmp(&other.min)
+        }
+    }
+}
+
+impl std::fmt::Display for Timestamp24Hr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:02}:{:02}", self.hr, self.min)
     }
 }
 

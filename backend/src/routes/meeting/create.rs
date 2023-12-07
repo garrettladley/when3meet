@@ -18,11 +18,25 @@ impl TryFrom<BodyData> for InsertMeeting {
 
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
         let name = SafeString::parse(body.name)?;
+
         let start = iso8601(&body.start_date)?;
         let end = iso8601(&body.end_date)?;
+        if start >= end {
+            return Err(format!(
+                "Start date ({}) must be before end date ({})",
+                start, end
+            ));
+        }
+
         let no_earlier_than =
             Timestamp24Hr::new(body.no_earlier_than_hr, body.no_earlier_than_min)?;
         let no_later_than = Timestamp24Hr::new(body.no_later_than_hr, body.no_later_than_min)?;
+        if no_earlier_than >= no_later_than {
+            return Err(format!(
+                "No earlier than ({}) must be before no later than ({})",
+                no_earlier_than, no_later_than
+            ));
+        }
 
         Ok(Self {
             name,
