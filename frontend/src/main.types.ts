@@ -4,19 +4,12 @@ export interface DBMeeting {
 }
 
 export interface Meeting {
-  start: Date;
-  end: Date;
-  noEarlierThan: Timestamp24Hr;
-  noLaterThan: Timestamp24Hr;
+  name: string;
+  range: TimeRange;
   users: User[];
 }
 
-export interface Timestamp24Hr {
-  hour: number;
-  minute: number;
-}
-
-export interface Slot {
+export interface TimeRange {
   start: Date;
   end: Date;
 }
@@ -24,5 +17,5 @@ export interface Slot {
 export interface User {
   id: string;
   name: string;
-  availability: Slot[];
+  availability: TimeRange[];
 }

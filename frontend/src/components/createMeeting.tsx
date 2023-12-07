@@ -1,58 +1,51 @@
 import { createSignal } from "solid-js";
 import { API_BASE_URL } from "~/consts";
-import { Meeting as MeetingT } from "~/main.types";
+import { Meeting as MeetingT, TimeRange } from "~/main.types";
 
 import { useNavigate } from "@solidjs/router";
 
 const getDefaultDate = () => {
   const date = new Date();
-  date.setHours(0, 0, 0, 0);
-  return date.toISOString().split("T")[0];
+  date.setHours(9);
+  date.setMinutes(0);
+  date.setSeconds(0);
+  date.setMilliseconds(0);
+  return date;
 };
 
 const getDefaultEndDate = () => {
-  const startDate = new Date();
+  const startDate = getDefaultDate();
   startDate.setDate(startDate.getDate() + ((5 - startDate.getDay() + 7) % 7));
-  return startDate.toISOString().split("T")[0];
-};
-
-const getDefaultTime = (hours: number, minutes: number): string => {
-  const formattedHours = hours < 10 ? `0${hours}` : `${hours}`;
-  const formattedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-
-  return `${formattedHours}:${formattedMinutes}`;
+  startDate.setHours(17);
+  startDate.setMinutes(0);
+  startDate.setSeconds(0);
+  startDate.setMilliseconds(0);
+  return startDate;
 };
 
 const CreateMeeting = () => {
   const navigate = useNavigate();
 
   const [meetingName, setMeetingName] = createSignal<string>("");
-  const [startDate, setStartDate] = createSignal<string>(getDefaultDate());
-  const [endDate, setEndDate] = createSignal<string>(getDefaultEndDate());
-  const [noEarlierThan, setNoEarlierThan] = createSignal<string>(
-    getDefaultTime(9, 0)
-  );
-  const [noLaterThan, setNoLaterThan] = createSignal<string>(
-    getDefaultTime(17, 0)
-  );
+  const [startRange, setStartRange] = createSignal<Date>(getDefaultDate());
+  const [endRange, setEndRange] = createSignal<Date>(getDefaultEndDate());
 
-  const isValidDateRange = new Date(startDate()) < new Date(endDate());
-  const isNoEarlierLaterThanValid = () => {
-    const noEarlierThanHour = parseInt(noEarlierThan().split(":")[0]);
-    const noEarlierThanMinute = parseInt(noEarlierThan().split(":")[1]);
-    const noLaterThanHour = parseInt(noLaterThan().split(":")[0]);
-    const noLaterThanMinute = parseInt(noLaterThan().split(":")[1]);
-
-    return (
-      noEarlierThanHour < noLaterThanHour ||
-      (noEarlierThanHour === noLaterThanHour &&
-        noEarlierThanMinute < noLaterThanMinute)
-    );
-  };
   const isFormValid = () => {
     return (
-      meetingName() !== "" && isValidDateRange && isNoEarlierLaterThanValid()
+      meetingName() !== "" &&
+      startRange() < endRange() &&
+      startRange().getTime() < endRange().getTime()
     );
+  };
+
+  const toDateString = (date: Date) => {
+    return date.toISOString().split("T")[0];
+  };
+
+  const toTimeString = (date: Date) => {
+    return `${String(date.getHours()).padStart(2, "0")}:${String(
+      date.getMinutes()
+    ).padStart(2, "0")}`;
   };
 
   const createMeeting = async () => {
@@ -66,12 +59,8 @@ const CreateMeeting = () => {
         credentials: "same-origin",
         body: JSON.stringify({
           name: meetingName(),
-          start_date: new Date(startDate()).toISOString(),
-          end_date: new Date(endDate()).toISOString(),
-          no_earlier_than_hr: parseInt(noEarlierThan().split(":")[0]),
-          no_earlier_than_min: parseInt(noEarlierThan().split(":")[1]),
-          no_later_than_hr: parseInt(noLaterThan().split(":")[0]),
-          no_later_than_min: parseInt(noLaterThan().split(":")[1]),
+          start: startRange().toISOString(),
+          end: endRange().toISOString(),
         }),
       });
 
@@ -81,16 +70,10 @@ const CreateMeeting = () => {
         navigate(`/${meetingId}`, {
           state: {
             name: meetingName(),
-            start: new Date(startDate()),
-            end: new Date(endDate()),
-            noEarlierThan: {
-              hour: parseInt(noEarlierThan().split(":")[0]),
-              minute: parseInt(noEarlierThan().split(":")[1]),
-            },
-            noLaterThan: {
-              hour: parseInt(noLaterThan().split(":")[0]),
-              minute: parseInt(noLaterThan().split(":")[1]),
-            },
+            range: {
+              start: startRange(),
+              end: endRange(),
+            } as TimeRange,
             users: [],
           } as MeetingT,
         });
@@ -121,8 +104,8 @@ const CreateMeeting = () => {
             class="shadow border  rounded py-2 px-3 text-gray-700 leading-tight"
             type="date"
             id="startDate"
-            value={startDate()}
-            onChange={(e) => setStartDate(e.target.value)}
+            value={toDateString(startRange())}
+            onChange={(e) => setStartRange(new Date(e.target.value))}
           />
         </div>
         <div class="mt-4">
@@ -133,8 +116,8 @@ const CreateMeeting = () => {
             class="shadow border  rounded py-2 px-3 text-gray-700 leading-tight"
             type="date"
             id="endDate"
-            value={endDate()}
-            onChange={(e) => setEndDate(e.target.value)}
+            value={toDateString(endRange())}
+            onChange={(e) => setEndRange(new Date(e.target.value))}
           />
         </div>
         <div class="mt-4">
@@ -145,8 +128,8 @@ const CreateMeeting = () => {
             class="shadow border  rounded py-2 px-3 text-gray-700 leading-tight"
             type="time"
             id="noEarlierThan"
-            value={noEarlierThan()}
-            onChange={(e) => setNoEarlierThan(e.target.value)}
+            value={toTimeString(startRange())}
+            onChange={(e) => setStartRange(new Date(e.target.value))}
           />
         </div>
         <div class="mt-4">
@@ -157,8 +140,8 @@ const CreateMeeting = () => {
             class="shadow border  rounded py-2 px-3 text-gray-700 leading-tight"
             type="time"
             id="noLaterThan"
-            value={noLaterThan()}
-            onChange={(e) => setNoLaterThan(e.target.value)}
+            value={toTimeString(endRange())}
+            onChange={(e) => setEndRange(new Date(e.target.value))}
           />
         </div>
         <div class="mt-4">
