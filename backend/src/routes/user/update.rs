@@ -35,7 +35,7 @@ pub async fn update_user(
         }
     };
 
-    match update_user_db(&pool, &User { id: user_id, user }).await {
+    match update_user_db(&pool, User { id: user_id, user }).await {
         Ok(user_id) => HttpResponse::Ok().body(user_id.to_string()),
         Err(e) => {
             tracing::error!("Failed to insert user: {}", e);
@@ -45,6 +45,6 @@ pub async fn update_user(
 }
 
 #[tracing::instrument(name = "Updating a user for the given user ID.", skip(pool, user))]
-pub async fn update_user_db(pool: &PgPool, user: &User) -> Result<uuid::Uuid, sqlx::Error> {
+pub async fn update_user_db(pool: &PgPool, user: User) -> Result<uuid::Uuid, sqlx::Error> {
     crate::transactions::user::update_user(pool, user).await
 }

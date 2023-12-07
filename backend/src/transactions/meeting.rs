@@ -1,5 +1,5 @@
 use crate::{
-    model::{DBMeeting, InsertMeeting, SafeString, Timestamp24Hr},
+    model::{DBMeeting, InsertMeeting, SafeString, TimeRange},
     routes::convert_err,
 };
 use sqlx::PgPool;
@@ -10,17 +10,15 @@ pub async fn insert_meeting(
 ) -> Result<uuid::Uuid, sqlx::Error> {
     let id = uuid::Uuid::new_v4();
 
-    sqlx::query!("INSERT INTO meetings (id, name, start_date, end_date, no_earlier_than_hr, no_earlier_than_min, no_later_than_hr, no_later_than_min) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)", 
-    id,
-    insert_meeting.name.as_ref(),
-    insert_meeting.start,
-    insert_meeting.end,
-    insert_meeting.no_earlier_than.hr,
-    insert_meeting.no_earlier_than.min,
-    insert_meeting.no_later_than.hr,
-    insert_meeting.no_later_than.min)
-        .execute(pool)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO meetings (id, name, range) VALUES ($1, $2, tstzrange($3, $4, '[]'))",
+        id,
+        insert_meeting.name.as_ref(),
+        insert_meeting.range.start,
+        insert_meeting.range.end
+    )
+    .execute(pool)
+    .await?;
 
     Ok(id)
 }
@@ -34,36 +32,16 @@ pub async fn select_meeting(pool: &PgPool, id: &uuid::Uuid) -> Result<DBMeeting,
             tracing::error!("No meeting found with id: {}", id);
             Err(sqlx::Error::RowNotFound)
         }
-        Some(record) => {
-            let no_earlier_than_hr = record.no_earlier_than_hr;
-            let no_earlier_than_min = record.no_earlier_than_min;
-            let no_later_than_hr = record.no_later_than_hr;
-            let no_later_than_min = record.no_later_than_min;
-
-            Ok(DBMeeting {
-                id: record.id,
-                meeting: InsertMeeting {
-                    name: SafeString::parse(record.name).map_err(|_| {
-                        convert_err("name", "Safe String contraint failed on name column.")
-                    })?,
-                    start: record.end_date,
-                    end: record.end_date,
-                    no_earlier_than: Timestamp24Hr::new(no_earlier_than_hr, no_earlier_than_min)
-                        .map_err(|_| {
-                            convert_err(
-                                "no_earlier_than",
-                                "Timestamp24Hr contraint failed on no_earlier_than column.",
-                            )
-                        })?,
-                    no_later_than: Timestamp24Hr::new(no_later_than_hr, no_later_than_min)
-                        .map_err(|_| {
-                            convert_err(
-                                "no_later_than",
-                                "Timestamp24Hr contraint failed on no_later_than column.",
-                            )
-                        })?,
-                },
-            })
-        }
+        Some(record) => Ok(DBMeeting {
+            id: record.id,
+            meeting: InsertMeeting {
+                name: SafeString::parse(record.name).map_err(|_| {
+                    convert_err("name", "Safe String contraint failed on name column.")
+                })?,
+                range: TimeRange::try_from((record.range.start, record.range.end)).map_err(
+                    |_| convert_err("range", "Failed to parse range from the database."),
+                )?,
+            },
+        }),
     }
 }

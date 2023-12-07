@@ -1,11 +1,13 @@
-use crate::model::Slot;
-use chrono::SecondsFormat;
+use crate::model::TimeRange;
+use chrono::{DateTime, Utc};
+use sqlx::postgres::types::PgRange;
+use std::collections::Bound;
 
 #[derive(serde::Serialize, serde::Deserialize, PartialEq)]
-pub struct Availability(pub Vec<Slot>);
+pub struct Availability(pub Vec<TimeRange>);
 
 impl Availability {
-    pub fn new(slots: Vec<Slot>) -> Self {
+    pub fn new(slots: Vec<TimeRange>) -> Self {
         Self(
             slots
                 .into_iter()
@@ -27,62 +29,68 @@ impl TryFrom<&str> for Availability {
     type Error = String;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        Ok(Self(
-            match value
+        Ok(Availability::new(
+            value
                 .split('|')
                 .map(|pair| {
                     let timestamps: Vec<&str> = pair.split('_').collect();
                     if timestamps.len() != 2 {
                         return Err("Invalid slot pair".to_string());
                     }
-                    Slot::try_from((timestamps[0], timestamps[1]))
+                    TimeRange::try_from((timestamps[0], timestamps[1]))
                 })
-                .collect::<Result<Vec<Slot>, String>>()
-            {
-                Ok(slots) => Availability::new(slots).0,
-                Err(e) => return Err(e.to_string()),
-            },
+                .collect::<Result<Vec<TimeRange>, String>>()?,
         ))
     }
 }
 
-impl std::fmt::Display for Availability {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let binding = self.0.iter().fold(String::new(), |mut binding, slot| {
-            binding.push_str(&format!(
-                "{}_{}|",
-                slot.start.to_rfc3339_opts(SecondsFormat::Secs, true),
-                slot.end.to_rfc3339_opts(SecondsFormat::Secs, true)
-            ));
-            binding
-        });
+impl TryFrom<Vec<(Bound<DateTime<Utc>>, Bound<DateTime<Utc>>)>> for Availability {
+    type Error = String;
 
-        let availability = binding.trim_end_matches('|');
+    fn try_from(
+        value: Vec<(Bound<DateTime<Utc>>, Bound<DateTime<Utc>>)>,
+    ) -> Result<Self, Self::Error> {
+        Ok(Availability::new(
+            value
+                .into_iter()
+                .map(TimeRange::try_from)
+                .collect::<Result<Vec<TimeRange>, String>>()?,
+        ))
+    }
+}
 
-        write!(f, "{}", availability)
+impl From<Availability> for Vec<PgRange<DateTime<Utc>>> {
+    fn from(val: Availability) -> Self {
+        val.0
+            .into_iter()
+            .map(|slot| PgRange {
+                start: Bound::Included(slot.start),
+                end: Bound::Excluded(slot.end),
+            })
+            .collect()
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::model::{availability, Slot};
+    use crate::model::{availability, TimeRange};
     use availability::Availability;
     use chrono::{DateTime, Utc};
 
     #[test]
     fn test_fold() {
         let slots = vec![
-            Slot::new(
+            TimeRange::fifteen(
                 DateTime::parse_from_str("1693746000", "%s")
                     .unwrap()
                     .with_timezone(&Utc),
             ),
-            Slot::new(
+            TimeRange::fifteen(
                 DateTime::parse_from_str("1693746900", "%s")
                     .unwrap()
                     .with_timezone(&Utc),
             ),
-            Slot::new(
+            TimeRange::fifteen(
                 DateTime::parse_from_str("1693748000", "%s")
                     .unwrap()
                     .with_timezone(&Utc),
@@ -94,15 +102,16 @@ mod tests {
         assert_eq!(
             folded_slots.0,
             vec![
-                Slot {
-                    start: DateTime::parse_from_str("1693746000", "%s")
+                TimeRange::new(
+                    DateTime::parse_from_str("1693746000", "%s")
                         .unwrap()
                         .with_timezone(&Utc),
-                    end: DateTime::parse_from_str("1693747800", "%s")
+                    DateTime::parse_from_str("1693747800", "%s")
                         .unwrap()
                         .with_timezone(&Utc),
-                },
-                Slot::new(
+                )
+                .unwrap(),
+                TimeRange::fifteen(
                     DateTime::parse_from_str("1693748000", "%s")
                         .unwrap()
                         .with_timezone(&Utc),

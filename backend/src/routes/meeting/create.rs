@@ -1,49 +1,20 @@
-use crate::model::{iso8601, InsertMeeting, SafeString, Timestamp24Hr};
+use crate::model::{time_range::TimeRange, InsertMeeting, SafeString};
 use actix_web::{web, HttpResponse};
 use sqlx::PgPool;
 
 #[derive(serde::Deserialize)]
 pub struct BodyData {
     pub name: String,
-    pub start_date: String,
-    pub end_date: String,
-    pub no_earlier_than_hr: i32,
-    pub no_earlier_than_min: i32,
-    pub no_later_than_hr: i32,
-    pub no_later_than_min: i32,
+    pub range: String,
 }
 
 impl TryFrom<BodyData> for InsertMeeting {
     type Error = String;
 
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
-        let name = SafeString::parse(body.name)?;
-
-        let start = iso8601(&body.start_date)?;
-        let end = iso8601(&body.end_date)?;
-        if start >= end {
-            return Err(format!(
-                "Start date ({}) must be before end date ({})",
-                start, end
-            ));
-        }
-
-        let no_earlier_than =
-            Timestamp24Hr::new(body.no_earlier_than_hr, body.no_earlier_than_min)?;
-        let no_later_than = Timestamp24Hr::new(body.no_later_than_hr, body.no_later_than_min)?;
-        if no_earlier_than >= no_later_than {
-            return Err(format!(
-                "No earlier than ({}) must be before no later than ({})",
-                no_earlier_than, no_later_than
-            ));
-        }
-
         Ok(Self {
-            name,
-            start,
-            end,
-            no_earlier_than,
-            no_later_than,
+            name: SafeString::parse(body.name)?,
+            range: TimeRange::try_from(body.range.as_str())?,
         })
     }
 }
@@ -53,12 +24,7 @@ impl TryFrom<BodyData> for InsertMeeting {
     skip(body, pool),
     fields(
         meeting_name = %body.name,
-        start_date = %body.start_date,
-        end_date = %body.end_date,
-        no_earlier_than_hr = %body.no_earlier_than_hr,
-        no_earlier_than_min = %body.no_earlier_than_min,
-        no_later_than_hr = %body.no_later_than_hr,
-        no_later_than_min = %body.no_later_than_min,
+        range = %body.range,
     )
 )]
 pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) -> HttpResponse {

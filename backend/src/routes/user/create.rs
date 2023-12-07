@@ -34,7 +34,7 @@ pub async fn create_user(
         }
     };
 
-    match insert_user(&pool, &meeting_id, &user).await {
+    match insert_user(&pool, &meeting_id, user).await {
         Ok(user_id) => HttpResponse::Ok().body(user_id.to_string()),
         Err(e) => {
             tracing::error!("Failed to insert user: {}", e);
@@ -50,7 +50,7 @@ pub async fn create_user(
 pub async fn insert_user(
     pool: &PgPool,
     meeting_id: &uuid::Uuid,
-    user: &InsertUser,
+    user: InsertUser,
 ) -> Result<uuid::Uuid, sqlx::Error> {
     crate::transactions::user::insert_user(pool, meeting_id, user).await
 }
