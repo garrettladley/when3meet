@@ -29,22 +29,6 @@ impl TimeRange {
     }
 }
 
-impl TryFrom<&str> for TimeRange {
-    type Error = String;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let value = value.split('|').collect::<Vec<&str>>();
-
-        if value.len() != 2 {
-            return Err(format!("Invalid time range: {}", value.join("-")));
-        }
-
-        let value = (value[0], value[1]);
-
-        Self::try_from(value)
-    }
-}
-
 impl TryFrom<(&str, &str)> for TimeRange {
     type Error = String;
 

@@ -5,7 +5,8 @@ use sqlx::PgPool;
 #[derive(serde::Deserialize)]
 pub struct BodyData {
     pub name: String,
-    pub range: String,
+    pub start: String,
+    pub end: String,
 }
 
 impl TryFrom<BodyData> for InsertMeeting {
@@ -14,7 +15,7 @@ impl TryFrom<BodyData> for InsertMeeting {
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
         Ok(Self {
             name: SafeString::parse(body.name)?,
-            range: TimeRange::try_from(body.range.as_str())?,
+            range: TimeRange::try_from((body.start.as_str(), body.end.as_str()))?,
         })
     }
 }
@@ -24,7 +25,8 @@ impl TryFrom<BodyData> for InsertMeeting {
     skip(body, pool),
     fields(
         meeting_name = %body.name,
-        range = %body.range,
+        start = %body.start,
+        end = %body.end
     )
 )]
 pub async fn create_meeting(body: web::Json<BodyData>, pool: web::Data<PgPool>) -> HttpResponse {

@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO meetings (id, name, range) VALUES ($1, $2, tstzrange($3, $4, '[]'))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3042b4b287d4a6c668ca32ac4de7054246796191e9b5d0e7c8a4dbe080b026ab"
+}

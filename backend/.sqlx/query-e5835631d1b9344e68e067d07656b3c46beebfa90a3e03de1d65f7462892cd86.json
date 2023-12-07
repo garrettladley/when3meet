@@ -15,33 +15,8 @@
       },
       {
         "ordinal": 2,
-        "name": "start_date",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 3,
-        "name": "end_date",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 4,
-        "name": "no_earlier_than_hr",
-        "type_info": "Int4"
-      },
-      {
-        "ordinal": 5,
-        "name": "no_earlier_than_min",
-        "type_info": "Int4"
-      },
-      {
-        "ordinal": 6,
-        "name": "no_later_than_hr",
-        "type_info": "Int4"
-      },
-      {
-        "ordinal": 7,
-        "name": "no_later_than_min",
-        "type_info": "Int4"
+        "name": "range",
+        "type_info": "TstzRange"
       }
     ],
     "parameters": {
@@ -50,11 +25,6 @@
       ]
     },
     "nullable": [
-      false,
-      false,
-      false,
-      false,
-      false,
       false,
       false,
       false
