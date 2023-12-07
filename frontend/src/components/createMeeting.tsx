@@ -1,5 +1,6 @@
 import { createSignal } from "solid-js";
 import { API_BASE_URL } from "~/consts";
+import { Meeting as MeetingT } from "~/main.types";
 
 import { useNavigate } from "@solidjs/router";
 
@@ -76,17 +77,21 @@ const CreateMeeting = () => {
 
       if (response.ok) {
         const meetingId = await response.text();
+
         navigate(`/${meetingId}`, {
           state: {
-            new: true,
-            meetingData: {
-              name: meetingName(),
-              start_date: new Date(startDate()).toISOString(),
-              end_date: new Date(endDate()).toISOString(),
-              no_earlier_than: noEarlierThan(),
-              no_later_than: noLaterThan(),
+            name: meetingName(),
+            start: new Date(startDate()),
+            end: new Date(endDate()),
+            noEarlierThan: {
+              hour: parseInt(noEarlierThan().split(":")[0]),
+              minute: parseInt(noEarlierThan().split(":")[1]),
             },
-          },
+            noLaterThan: {
+              hour: parseInt(noLaterThan().split(":")[0]),
+              minute: parseInt(noLaterThan().split(":")[1]),
+            },
+          } as MeetingT,
         });
       } else {
         console.error("Failed to create meeting");

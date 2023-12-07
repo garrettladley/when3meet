@@ -1,15 +1,15 @@
 import { createSignal, onMount } from "solid-js";
+import { useLocation } from "solid-start";
 import { API_BASE_URL } from "~/consts";
-import { Meeting } from "~/main.types";
+import { Meeting as MeetingT } from "~/main.types";
 
 interface MeetingProps {
-  new?: boolean;
   id: string;
-  meeting?: Meeting;
 }
 
 export default function Meeting(props: MeetingProps) {
-  const [meetingData, setMeetingData] = createSignal<Meeting>();
+  const location = useLocation();
+  const [meetingData, setMeetingData] = createSignal<MeetingT>();
 
   const fetchMeetingData = async () => {
     try {
@@ -26,10 +26,10 @@ export default function Meeting(props: MeetingProps) {
   };
 
   onMount(() => {
-    if (!props.meeting) {
-      fetchMeetingData();
+    if (location.state) {
+      setMeetingData(location.state as MeetingT);
     } else {
-      setMeetingData(props.meeting);
+      fetchMeetingData();
     }
   });
 

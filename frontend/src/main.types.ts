@@ -1,6 +1,11 @@
 export interface DBMeeting {
   id: string;
-  meeting: DBMeeting;
+  meeting: UserMeeting;
+}
+
+export interface UserMeeting {
+  meeting: Meeting;
+  users: User[];
 }
 
 export interface Meeting {
@@ -8,7 +13,6 @@ export interface Meeting {
   end: Date;
   noEarlierThan: Timestamp24Hr;
   noLaterThan: Timestamp24Hr;
-  users: User[];
 }
 
 export interface Timestamp24Hr {
