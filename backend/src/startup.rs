@@ -9,14 +9,15 @@ pub fn run(listener: TcpListener, db_pool: PgPool) -> Result<Server, std::io::Er
     let db_pool = web::Data::new(db_pool);
 
     let server = HttpServer::new(move || {
-        let cors = Cors::default()
-            .allowed_origin("http://127.0.0.1:3000")
-            .allowed_origin("http://[::1]:3000")
-            .allowed_methods(vec!["GET", "POST"])
-            .allowed_headers(vec!["content-type"]);
         App::new()
             .wrap(TracingLogger::default())
-            .wrap(cors)
+            .wrap(
+                Cors::default()
+                    .allowed_origin("http://127.0.0.1:3000")
+                    .allowed_origin("http://[::1]:3000")
+                    .allowed_methods(vec!["GET", "POST"])
+                    .allowed_headers(vec!["content-type"]),
+            )
             .service(
                 web::scope("/meeting")
                     .route("/create", web::post().to(create_meeting))
