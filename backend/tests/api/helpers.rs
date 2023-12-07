@@ -7,8 +7,8 @@ use when3meet::startup::run;
 use when3meet::telemetry::{get_subscriber, init_subscriber};
 
 static TRACING: Lazy<()> = Lazy::new(|| {
-    let default_filter_level = "info".to_string();
-    let subscriber_name = "test".to_string();
+    let default_filter_level = "info";
+    let subscriber_name = "test";
 
     if std::env::var("TEST_LOG").is_ok() {
         let subscriber = get_subscriber(subscriber_name, default_filter_level, std::io::stdout);
