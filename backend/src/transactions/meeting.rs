@@ -35,7 +35,7 @@ pub async fn select_meeting(pool: &PgPool, id: &uuid::Uuid) -> Result<DBMeeting,
         Some(record) => Ok(DBMeeting {
             id: record.id,
             meeting: InsertMeeting {
-                name: SafeString::parse(record.name).map_err(|_| {
+                name: SafeString::parse(&record.name).map_err(|_| {
                     convert_err("name", "Safe String contraint failed on name column.")
                 })?,
                 range: TimeRange::try_from((record.range.start, record.range.end)).map_err(

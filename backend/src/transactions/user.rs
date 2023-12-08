@@ -24,7 +24,7 @@ pub async fn select_user_by_meeting_id(
         let user = User {
             id: record.id,
             user: InsertUser {
-                name: SafeString::parse(record.name).map_err(|_| {
+                name: SafeString::parse(&record.name).map_err(|_| {
                     convert_err("name", "Safe String constraint failed on the name column.")
                 })?,
                 availability: Availability::try_from(
