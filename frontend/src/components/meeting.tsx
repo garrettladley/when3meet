@@ -1,7 +1,7 @@
-import { createSignal, onMount } from "solid-js";
-import { useLocation } from "solid-start";
-import { API_BASE_URL } from "~/consts";
-import { Meeting as MeetingT } from "~/main.types";
+import { createSignal, onMount } from 'solid-js';
+import { useLocation } from 'solid-start';
+import { API_BASE_URL } from '~/consts';
+import { Meeting as MeetingT } from '~/main.types';
 
 interface MeetingProps {
   id: string;

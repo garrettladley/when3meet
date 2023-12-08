@@ -1,8 +1,8 @@
-import { createSignal } from "solid-js";
-import { API_BASE_URL } from "~/consts";
-import { Meeting as MeetingT, TimeRange } from "~/main.types";
+import { createSignal } from 'solid-js';
+import { API_BASE_URL } from '~/consts';
+import { Meeting as MeetingT, TimeRange } from '~/main.types';
 
-import { useNavigate } from "@solidjs/router";
+import { useNavigate } from '@solidjs/router';
 
 const getDefaultDate = () => {
   const date = new Date();
@@ -48,6 +48,13 @@ const CreateMeeting = () => {
     ).padStart(2, "0")}`;
   };
 
+  const timeStringSetDate = (date: Date, timeString: string) => {
+    const [hours, minutes] = timeString.split(":");
+    date.setHours(Number(hours));
+    date.setMinutes(Number(minutes));
+    return date;
+  };
+
   const createMeeting = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/meeting/create`, {
@@ -66,7 +73,6 @@ const CreateMeeting = () => {
 
       if (response.ok) {
         const meetingId = await response.text();
-
         navigate(`/${meetingId}`, {
           state: {
             name: meetingName(),
@@ -129,7 +135,9 @@ const CreateMeeting = () => {
             type="time"
             id="noEarlierThan"
             value={toTimeString(startRange())}
-            onChange={(e) => setStartRange(new Date(e.target.value))}
+            onChange={(e) =>
+              setStartRange(timeStringSetDate(startRange(), e.target.value))
+            }
           />
         </div>
         <div class="mt-4">
@@ -141,7 +149,9 @@ const CreateMeeting = () => {
             type="time"
             id="noLaterThan"
             value={toTimeString(endRange())}
-            onChange={(e) => setEndRange(new Date(e.target.value))}
+            onChange={(e) =>
+              setEndRange(timeStringSetDate(endRange(), e.target.value))
+            }
           />
         </div>
         <div class="mt-4">

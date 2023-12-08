@@ -1,4 +1,4 @@
-import CreateMeeting from "~/components/createMeeting";
+import CreateMeeting from '~/components/createMeeting';
 
 export default function Home() {
   return (
