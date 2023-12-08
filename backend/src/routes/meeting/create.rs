@@ -14,7 +14,7 @@ impl TryFrom<BodyData> for InsertMeeting {
 
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
         Ok(Self {
-            name: SafeString::parse(body.name)?,
+            name: SafeString::parse(body.name.as_str())?,
             range: TimeRange::try_from((body.start.as_str(), body.end.as_str()))?,
         })
     }

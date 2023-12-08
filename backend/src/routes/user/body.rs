@@ -11,7 +11,7 @@ impl TryFrom<BodyData> for InsertUser {
 
     fn try_from(body: BodyData) -> Result<Self, Self::Error> {
         Ok(Self {
-            name: SafeString::parse(body.name)?,
+            name: SafeString::parse(body.name.as_str())?,
             availability: Availability::try_from(body.availability.as_str())?,
         })
     }
